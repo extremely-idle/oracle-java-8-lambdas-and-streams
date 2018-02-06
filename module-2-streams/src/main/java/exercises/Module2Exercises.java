@@ -2,13 +2,16 @@ package exercises;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static java.nio.file.Files.newBufferedReader;
+import static java.nio.file.Paths.get;
+import static java.util.Arrays.asList;
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.of;
 
 /**
  * @author Speakjava (Simon Ritter)
@@ -41,64 +44,84 @@ public class Module2Exercises {
 
     /**
      * Exercise 1
-     *
+     * <p>
      * Create a new list with all the strings from original list converted to
      * lower case and print them out.
      */
     private void exercise1() {
-        List<String> list = Arrays.asList(
+        final List<String> list = asList(
                 "The", "Quick", "BROWN", "Fox", "Jumped", "Over", "The", "LAZY", "DOG");
 
-        /* YOUR CODE HERE */
+        final List<String> lowerList = list.stream()
+                                           .map(String::toLowerCase)
+                                           .peek(System.out::println)
+                                           .collect(toList());
     }
 
     /**
      * Exercise 2
-     *
+     * <p>
      * Modify exercise 1 so that the new list only contains strings that have an
      * odd length
      */
     private void exercise2() {
-        List<String> list = Arrays.asList(
+        List<String> list = asList(
                 "The", "Quick", "BROWN", "Fox", "Jumped", "Over", "The", "LAZY", "DOG");
 
-        /* YOUR CODE HERE */
+        final List<String> lowerOddLengthList = list.stream()
+                                                    .filter((string) -> string.length() % 2 != 0)
+                                                    .map(String::toLowerCase)
+                                                    .peek(System.out::println)
+                                                    .collect(toList());
     }
 
     /**
      * Exercise 3
-     *
+     * <p>
      * Join the second, third and forth strings of the list into a single string,
      * where each word is separated by a hyphen (-). Print the resulting string.
      */
     private void exercise3() {
-        List<String> list = Arrays.asList(
+        final List<String> list = asList(
                 "The", "quick", "brown", "fox", "jumped", "over", "the", "lazy", "dog");
 
-        /* YOUR CODE HERE */
+        String result = list.stream()
+                            .skip(1)
+                            .limit(3)
+                            .collect(joining("-"));
+
+        System.out.println(result);
     }
 
     /**
      * Count the number of lines in the file using the BufferedReader provided
      */
     private void exercise4() throws IOException {
-        try (BufferedReader reader = Files.newBufferedReader(
-                Paths.get("SonnetI.txt"), StandardCharsets.UTF_8)) {
-            /* YOUR CODE HERE */
+        final Path resourcePath = retrieveResourcePath();
+        try (BufferedReader reader = newBufferedReader(resourcePath)) {
+            long count = reader.lines()
+                               .count();
+            System.out.println(count);
         }
     }
 
     /**
      * Using the BufferedReader to access the file, create a list of words with
      * no duplicates contained in the file.  Print the words.
-     *
+     * <p>
      * HINT: A regular expression, WORD_REGEXP, is already defined for your use.
      */
     private void exercise5() throws IOException {
-        try (BufferedReader reader = Files.newBufferedReader(
-                Paths.get("SonnetI.txt"), StandardCharsets.UTF_8)) {
-            /* YOUR CODE HERE */
+        final Path resourcePath = retrieveResourcePath();
+        List<String> nonDuplicateList;
+        try (BufferedReader reader = newBufferedReader(resourcePath)) {
+            nonDuplicateList = reader.lines()
+                                     .flatMap(line -> of(line.split(WORD_REGEXP)))
+                                     .distinct()
+                                     .collect(toList());
         }
+
+        nonDuplicateList.forEach(System.out::println);
     }
 
     /**
@@ -107,20 +130,40 @@ public class Module2Exercises {
      * sorted by natural order.  Print the contents of the list.
      */
     private void exercise6() throws IOException {
-        try (BufferedReader reader = Files.newBufferedReader(
-                Paths.get("SonnetI.txt"), StandardCharsets.UTF_8)) {
-            /* YOUR CODE HERE */
+        final Path resourcePath = retrieveResourcePath();
+        List<String> result;
+        try (BufferedReader reader = newBufferedReader(resourcePath)) {
+            result = reader.lines()
+                           .flatMap(line -> of(line.split(WORD_REGEXP)))
+                           .distinct()
+                           .map(String::toLowerCase)
+                           .sorted()
+                           .collect(toList());
         }
+
+        result.forEach(System.out::println);
     }
 
     /**
      * Modify exercise6 so that the words are sorted by length
      */
     private void exercise7() throws IOException {
-        try (BufferedReader reader = Files.newBufferedReader(
-                Paths.get("SonnetI.txt"), StandardCharsets.UTF_8)) {
-            /* YOUR CODE HERE */
+        final Path resourcePath = retrieveResourcePath();
+        List<String> result;
+        try (BufferedReader reader = newBufferedReader(resourcePath)) {
+            result = reader.lines()
+                           .flatMap(line -> of(line.split(WORD_REGEXP)))
+                           .distinct()
+                           .map(String::toLowerCase)
+                           .sorted(comparingInt(String::length))
+                           .collect(toList());
         }
+
+        result.forEach(System.out::println);
+    }
+
+    private Path retrieveResourcePath() {
+        return get("module-2-streams", "src", "main", "resources", "SonnetI.txt").toAbsolutePath();
     }
 
     /**
