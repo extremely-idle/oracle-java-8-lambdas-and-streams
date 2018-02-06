@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>module-1-introduction</module>
+        <module>module-1-lambdas</module>
+        <module>module-2-streams</module>
     </modules>
 </project>
